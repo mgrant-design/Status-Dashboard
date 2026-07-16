@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #f3f5f7;
+      color: #202124;
+      font-size: 13px;
+    }
+
+    .dashboard-container {
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .title-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      object-fit: cover;
+      clip-path: inset(3px round 12px);
+      transform: scale(1.08);
+    }
+
+    .dashboard-title {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .intro-panel {
+      background: #ffffff;
+      border: 1px solid #dfe3e7;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+      margin-bottom: 14px;
+    }
+
+    .intro-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+
+    .legend-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 9px;
+      color: #202124;
+    }
+
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #d0d7de;
+      background: #fff;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-operational {
+      background: #2e9d50;
+    }
+
+    .dot-minor {
+      background: #f2b01e;
+    }
+
+    .dot-major {
+      background: #e56a3c;
+    }
+
+    .dot-critical {
+      background: #b3261e;
+    }
+
+    .dot-maintenance {
+      background: #174ea6;
+    }
+
+    .dot-unknown {
+      background: #777777;
+    }
+
+    .bookmark-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: rgba(243, 245, 247, .96);
+      border: 1px solid #dfe3e7;
+      border-radius: 9px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+      backdrop-filter: blur(6px);
+    }
+
+    .bookmark-button {
+      border: 1px solid #cfd4da;
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px 10px;
+      color: #374151;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .bookmark-button:hover {
+      filter: brightness(.96);
+    }
+
+    .bookmark-button.operational {
+      background: #e6f4ea;
+      border-color: #81c995;
+      color: #137333;
+    }
+
+    .bookmark-button.minor {
+      background: #fef7e0;
+      border-color: #f2b01e;
+      color: #9a5b00;
+    }
+
+    .bookmark-button.major {
+      background: #fce8e6;
+      border-color: #e56a3c;
+      color: #b3261e;
+    }
+
+    .bookmark-button.critical {
+      background: #f4c7c3;
+      border-color: #b3261e;
+      color: #8b0000;
+    }
+
+    .bookmark-button.maintenance {
+      background: #e8f0fe;
+      border-color: #669df6;
+      color: #174ea6;
+    }
+
+    .bookmark-button.unknown {
+      background: #eeeeee;
+      border-color: #999999;
+      color: #555555;
+    }
+
+    .category {
+      margin-bottom: 28px;
+    }
+
+    .category-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #dfe3e7;
+    }
+
+    .active-issues {
+      margin-bottom: 30px;
+      padding: 14px;
+      border: 1px solid #e0b4a5;
+      border-radius: 10px;
+      background: #fffaf7;
+    }
+
+    .active-issues-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #9c2f1c;
+    }
+
+    .active-issues-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .status-card {
+      scroll-margin-top: 105px;
+      background: #fff;
+      border-radius: 9px;
+      padding: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+      border-left: 6px solid #777;
+      min-height: 100px;
+      transition:
+        box-shadow .25s ease,
+        transform .25s ease;
+    }
+
+    .status-card.has-issue {
+      min-height: auto;
+      padding: 14px;
+    }
+
+    .status-card.jump-highlight {
+      box-shadow:
+        0 0 0 3px rgba(26, 115, 232, .28),
+        0 3px 10px rgba(0, 0, 0, .16);
+      transform: translateY(-2px);
+    }
+
+    .service-category {
+      display: inline-block;
+      margin-bottom: 6px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      background: #eef1f4;
+      color: #59636e;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .header-content {
+      min-width: 0;
+    }
+
+    .service {
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .status {
+      font-size: 14px;
+      margin-top: 5px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .checked {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .toggle-button {
+      border: 1px solid #cfd4da;
+      background: #fff;
+      border-radius: 6px;
+      padding: 6px 9px;
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .toggle-button:hover {
+      background: #f1f3f4;
+    }
+
+    .incident-summary {
+      margin-top: 12px;
+    }
+
+    .incident-summary:empty {
+      display: none;
+    }
+
+    .incident {
+      padding: 11px;
+      border-radius: 7px;
+      background: #fff7f2;
+      border: 1px solid #e56a3c;
+    }
+
+    .incident + .incident {
+      margin-top: 8px;
+    }
+
+    .incident-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .incident-meta {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .incident-update {
+      margin-top: 7px;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .affected {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    .incident-link {
+      display: inline-block;
+      margin-top: 7px;
+      font-size: 11px;
+    }
+
+    .details {
+      display: none;
+    }
+
+    .details.expanded {
+      display: block;
+    }
+
+    .section {
+      margin-top: 13px;
+      padding-top: 10px;
+      border-top: 1px solid #eceff1;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .component {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f1f2;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .component:last-child {
+      border-bottom: 0;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .operational {
+      border-left-color: #2e9d50;
+    }
+
+    .minor {
+      border-left-color: #f2b01e;
+    }
+
+    .major {
+      border-left-color: #e56a3c;
+    }
+
+    .critical {
+      border-left-color: #b3261e;
+    }
+
+    .maintenance {
+      border-left-color: #174ea6;
+    }
+
+    .unknown {
+      border-left-color: #777;
+    }
+
+    .badge-operational {
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .badge-degraded_performance,
+    .badge-minor {
+      background: #fef7e0;
+      color: #b06000;
+    }
+
+    .badge-partial_outage,
+    .badge-major {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    .badge-major_outage,
+    .badge-critical {
+      background: #f4c7c3;
+      color: #8b0000;
+    }
+
+    .badge-under_maintenance,
+    .badge-maintenance {
+      background: #e8f0fe;
+      color: #174ea6;
+    }
+
+    .badge-unknown {
+      background: #eee;
+      color: #555;
+    }
+
+    .empty {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .error {
+      color: #b3261e;
+      font-size: 11px;
+      margin-top: 7px;
+    }
+
+    @media (max-width: 1000px) {
+      .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 10px;
+      }
+
+      .title-row {
+        align-items: flex-start;
+      }
+
+      .title-icon {
+        width: 44px;
+        height: 44px;
+      }
+
+      .service-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-title {
+        font-size: 22px;
+      }
+
+      .bookmark-bar {
+        padding: 8px;
+      }
+
+      .status-card {
+        scroll-margin-top: 145px;
+      }
+
+      .legend-item {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="dashboard-container">
+
+    <div class="page-header">
+
+      <div class="title-row">
+        <img
+          class="title-icon"
+          alt="Pure Dental icon"
+          src="data:image/png;base64,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">
+
+        <h1 class="dashboard-title">
+          Pure Dental Status Dashboard
+        </h1>
+      </div>
+
+      <div class="intro-panel">
+
+        <div class="intro-text">
+          This dashboard monitors key Pure Dental applications and services.
+          <strong>Active Issues</strong> are automatically moved to the top
+          for quicker review. Use the bookmark buttons to jump to any service
+          card. Click <strong>Show Details</strong> on any card for component
+          status and scheduled maintenance.
+        </div>
+
+        <div class="legend-title">
+          Color Key
+        </div>
+
+        <div class="legend-row">
+
+          <div class="legend-item">
+            <span class="legend-dot dot-operational"></span>
+            Operational
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot dot-minor"></span>
+            Minor Issue / Degraded
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot dot-major"></span>
+            Major Issue / Partial Outage
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot dot-critical"></span>
+            Critical / Major Outage
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot dot-maintenance"></span>
+            Maintenance
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot dot-unknown"></span>
+            Unknown / Unavailable
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="bookmarkBar" class="bookmark-bar">
+      <span class="empty">Loading bookmarks...</span>
+    </div>
+
+    <div id="dashboard">
+      <div class="empty">Loading services...</div>
+    </div>
+
+  </div>
+
+  <script>
+    const CATEGORY_PRIORITY = {
+      'Primary Applications': 1,
+      'Communications & Business Applications': 2,
+      'Cloud & Productivity Services': 3,
+      'Dental Technology': 4,
+      'AI Services': 5
+    };
+
+    function formatStatus(status) {
+      return String(status || 'unknown')
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, function(letter) {
+          return letter.toUpperCase();
+        });
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return '';
+      }
+
+      return new Date(value).toLocaleString();
+    }
+
+    function createBadge(status) {
+      const badge = document.createElement('span');
+
+      badge.className =
+        'badge badge-' + (status || 'unknown');
+
+      badge.textContent = formatStatus(status);
+
+      return badge;
+    }
+
+    function toggleDetails(serviceId) {
+      const details =
+        document.getElementById('details-' + serviceId);
+
+      const button =
+        document.getElementById('button-' + serviceId);
+
+      if (!details || !button) {
+        return;
+      }
+
+      const expanded =
+        details.classList.toggle('expanded');
+
+      button.textContent =
+        expanded ? 'Hide Details' : 'Show Details';
+    }
+
+    function jumpToService(serviceId) {
+      const card =
+        document.getElementById('card-' + serviceId);
+
+      if (!card) {
+        return;
+      }
+
+      card.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+      card.classList.remove('jump-highlight');
+
+      window.setTimeout(function() {
+        card.classList.add('jump-highlight');
+      }, 250);
+
+      window.setTimeout(function() {
+        card.classList.remove('jump-highlight');
+      }, 1800);
+    }
+
+    function getDisplayIndicator(service) {
+      const baseIndicator =
+        String(service.indicator || 'unknown')
+          .toLowerCase();
+
+      const incidents = service.incidents || [];
+
+      if (incidents.length === 0) {
+        return baseIndicator;
+      }
+
+      const impactRanks = {
+        critical: 1,
+        major: 2,
+        minor: 3,
+        maintenance: 4,
+        unknown: 5
+      };
+
+      let highestImpact = '';
+
+      incidents.forEach(function(incident) {
+        const impact =
+          String(incident.impact || '')
+            .toLowerCase();
+
+        if (!impactRanks[impact]) {
+          return;
+        }
+
+        if (
+          !highestImpact ||
+          impactRanks[impact] <
+            impactRanks[highestImpact]
+        ) {
+          highestImpact = impact;
+        }
+      });
+
+      if (highestImpact) {
+        return highestImpact;
+      }
+
+      if (baseIndicator === 'operational') {
+        return 'major';
+      }
+
+      return baseIndicator;
+    }
+
+    function isServiceDisrupted(service) {
+      const hasIncident =
+        service.incidents &&
+        service.incidents.length > 0;
+
+      return getDisplayIndicator(service) !== 'operational' ||
+        hasIncident;
+    }
+
+    function getSeverityRank(service) {
+      const indicator = getDisplayIndicator(service);
+
+      const ranks = {
+        critical: 1,
+        major: 2,
+        minor: 3,
+        unknown: 4,
+        maintenance: 5,
+        operational: 6
+      };
+
+      return ranks[indicator] || 4;
+    }
+
+    function getCategoryRank(category) {
+      return CATEGORY_PRIORITY[category] || 99;
+    }
+
+    function sortByCategoryAndSeverity(a, b) {
+      const categoryDifference =
+        getCategoryRank(a.category) -
+        getCategoryRank(b.category);
+
+      if (categoryDifference !== 0) {
+        return categoryDifference;
+      }
+
+      const severityDifference =
+        getSeverityRank(a) -
+        getSeverityRank(b);
+
+      if (severityDifference !== 0) {
+        return severityDifference;
+      }
+
+      return String(a.service || '')
+        .localeCompare(String(b.service || ''));
+    }
+
+    function sortByCategoryAndName(a, b) {
+      const categoryDifference =
+        getCategoryRank(a.category) -
+        getCategoryRank(b.category);
+
+      if (categoryDifference !== 0) {
+        return categoryDifference;
+      }
+
+      return String(a.service || '')
+        .localeCompare(String(b.service || ''));
+    }
+
+    function renderBookmarks(services) {
+      const bookmarkBar =
+        document.getElementById('bookmarkBar');
+
+      bookmarkBar.innerHTML = '';
+
+      services
+        .slice()
+        .sort(sortByCategoryAndName)
+        .forEach(function(service) {
+          const button =
+            document.createElement('button');
+
+          const indicator =
+            getDisplayIndicator(service);
+
+          button.type = 'button';
+          button.className =
+            'bookmark-button ' + indicator;
+
+          button.textContent = service.service;
+
+          button.addEventListener('click', function() {
+            jumpToService(service.id);
+          });
+
+          bookmarkBar.appendChild(button);
+        });
+
+      if (services.length === 0) {
+        bookmarkBar.innerHTML =
+          '<span class="empty">No services available.</span>';
+      }
+    }
+
+    function renderComponents(container, components) {
+      container.innerHTML = '';
+
+      if (!components || components.length === 0) {
+        container.innerHTML =
+          '<div class="empty">No component information available.</div>';
+        return;
+      }
+
+      components.forEach(function(component) {
+        const row = document.createElement('div');
+        row.className = 'component';
+
+        const name = document.createElement('span');
+        name.textContent = component.name;
+
+        row.appendChild(name);
+        row.appendChild(createBadge(component.status));
+
+        container.appendChild(row);
+      });
+    }
+
+    function renderIncidents(container, incidents) {
+      container.innerHTML = '';
+
+      if (!incidents || incidents.length === 0) {
+        return;
+      }
+
+      incidents.forEach(function(incident) {
+        const box = document.createElement('div');
+        box.className = 'incident';
+
+        const title = document.createElement('div');
+        title.className = 'incident-title';
+        title.textContent = incident.name;
+
+        const meta = document.createElement('div');
+        meta.className = 'incident-meta';
+
+        meta.textContent =
+          formatStatus(incident.status) +
+          ' • ' +
+          formatStatus(incident.impact) +
+          ' • Updated ' +
+          formatDate(incident.updatedAt);
+
+        box.appendChild(title);
+        box.appendChild(meta);
+
+        if (incident.latestUpdate) {
+          const update = document.createElement('div');
+          update.className = 'incident-update';
+          update.textContent = incident.latestUpdate;
+          box.appendChild(update);
+        }
+
+        if (
+          incident.affectedComponents &&
+          incident.affectedComponents.length > 0
+        ) {
+          const affected = document.createElement('div');
+          affected.className = 'affected';
+
+          affected.textContent =
+            'Affected: ' +
+            incident.affectedComponents.join(', ');
+
+          box.appendChild(affected);
+        }
+
+        if (incident.link) {
+          const link = document.createElement('a');
+
+          link.className = 'incident-link';
+          link.href = incident.link;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'View incident details';
+
+          box.appendChild(link);
+        }
+
+        container.appendChild(box);
+      });
+    }
+
+    function renderMaintenance(container, items) {
+      container.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        container.innerHTML =
+          '<div class="empty">No scheduled maintenance.</div>';
+        return;
+      }
+
+      items.forEach(function(item) {
+        const row = document.createElement('div');
+        row.className = 'component';
+
+        const name = document.createElement('span');
+        name.textContent =
+          item.name || 'Scheduled maintenance';
+
+        row.appendChild(name);
+
+        row.appendChild(
+          createBadge(
+            item.status || 'under_maintenance'
+          )
+        );
+
+        container.appendChild(row);
+      });
+    }
+
+    function createServiceCard(service, showCategory) {
+      const disrupted = isServiceDisrupted(service);
+
+      const displayIndicator =
+        getDisplayIndicator(service);
+
+      const card = document.createElement('div');
+
+      card.id = 'card-' + service.id;
+
+      card.className =
+        'status-card ' +
+        displayIndicator +
+        (disrupted ? ' has-issue' : '');
+
+      const categoryLabel = showCategory
+        ? '<div class="service-category">' +
+            service.category +
+          '</div>'
+        : '';
+
+      card.innerHTML = `
+        ${categoryLabel}
+
+        <div class="header">
+
+          <div class="header-content">
+
+            <div class="service">
+              ${service.service}
+            </div>
+
+            <div class="status">
+              ${service.description || 'Status unavailable'}
+            </div>
+
+            <div class="checked">
+              Last checked: ${service.checked || ''}
+            </div>
+
+          </div>
+
+          <button
+            id="button-${service.id}"
+            class="toggle-button"
+            type="button"
+            onclick="toggleDetails('${service.id}')">
+            Show Details
+          </button>
+
+        </div>
+
+        <div
+          id="incidents-${service.id}"
+          class="incident-summary">
+        </div>
+
+        <div
+          id="details-${service.id}"
+          class="details">
+
+          <div class="section">
+
+            <div class="section-title">
+              Component Status
+            </div>
+
+            <div id="components-${service.id}"></div>
+
+          </div>
+
+          <div class="section">
+
+            <div class="section-title">
+              Scheduled Maintenance
+            </div>
+
+            <div id="maintenance-${service.id}"></div>
+
+          </div>
+
+        </div>
+      `;
+
+      if (service.error) {
+        const error = document.createElement('div');
+        error.className = 'error';
+        error.textContent = service.error;
+        card.appendChild(error);
+      }
+
+      return card;
+    }
+
+    function populateServiceCard(service) {
+      const incidentsContainer =
+        document.getElementById(
+          'incidents-' + service.id
+        );
+
+      const componentsContainer =
+        document.getElementById(
+          'components-' + service.id
+        );
+
+      const maintenanceContainer =
+        document.getElementById(
+          'maintenance-' + service.id
+        );
+
+      if (
+        !incidentsContainer ||
+        !componentsContainer ||
+        !maintenanceContainer
+      ) {
+        return;
+      }
+
+      renderIncidents(
+        incidentsContainer,
+        service.incidents
+      );
+
+      renderComponents(
+        componentsContainer,
+        service.components
+      );
+
+      renderMaintenance(
+        maintenanceContainer,
+        service.maintenance
+      );
+    }
+
+    function renderDashboard(services) {
+      const dashboard =
+        document.getElementById('dashboard');
+
+      dashboard.innerHTML = '';
+
+      renderBookmarks(services);
+
+      const disruptedServices =
+        services
+          .filter(isServiceDisrupted)
+          .sort(sortByCategoryAndSeverity);
+
+      const operationalServices =
+        services.filter(function(service) {
+          return !isServiceDisrupted(service);
+        });
+
+      if (disruptedServices.length > 0) {
+        const activeSection =
+          document.createElement('div');
+
+        activeSection.className = 'active-issues';
+
+        const activeTitle =
+          document.createElement('div');
+
+        activeTitle.className = 'active-issues-title';
+
+        activeTitle.textContent =
+          'Active Issues (' +
+          disruptedServices.length +
+          ')';
+
+        const activeGrid =
+          document.createElement('div');
+
+        activeGrid.className = 'active-issues-grid';
+
+        disruptedServices.forEach(function(service) {
+          activeGrid.appendChild(
+            createServiceCard(service, true)
+          );
+        });
+
+        activeSection.appendChild(activeTitle);
+        activeSection.appendChild(activeGrid);
+        dashboard.appendChild(activeSection);
+
+        disruptedServices.forEach(function(service) {
+          populateServiceCard(service);
+        });
+      }
+
+      const categories = {};
+
+      operationalServices.forEach(function(service) {
+        if (!categories[service.category]) {
+          categories[service.category] = [];
+        }
+
+        categories[service.category].push(service);
+      });
+
+      Object.keys(categories)
+        .sort(function(a, b) {
+          return getCategoryRank(a) -
+            getCategoryRank(b);
+        })
+        .forEach(function(categoryName) {
+          const category =
+            document.createElement('div');
+
+          category.className = 'category';
+
+          const title =
+            document.createElement('div');
+
+          title.className = 'category-title';
+          title.textContent = categoryName;
+
+          const serviceGrid =
+            document.createElement('div');
+
+          serviceGrid.className = 'service-grid';
+
+          const sortedServices =
+            categories[categoryName]
+              .slice()
+              .sort(function(a, b) {
+                return String(a.service || '')
+                  .localeCompare(
+                    String(b.service || '')
+                  );
+              });
+
+          sortedServices.forEach(function(service) {
+            serviceGrid.appendChild(
+              createServiceCard(service, false)
+            );
+          });
+
+          category.appendChild(title);
+          category.appendChild(serviceGrid);
+          dashboard.appendChild(category);
+
+          sortedServices.forEach(function(service) {
+            populateServiceCard(service);
+          });
+        });
+
+      if (
+        disruptedServices.length === 0 &&
+        operationalServices.length === 0
+      ) {
+        dashboard.innerHTML =
+          '<div class="empty">No service data available.</div>';
+      }
+    }
+
+    function loadDashboard() {
+      google.script.run
+        .withSuccessHandler(function(services) {
+          renderDashboard(services || []);
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('bookmarkBar')
+            .innerHTML = '';
+
+          document.getElementById('dashboard')
+            .innerHTML =
+            '<div class="error">' +
+            (
+              error.message ||
+              'Unable to load dashboard'
+            ) +
+            '</div>';
+        })
+        .getDashboardStatus();
+    }
+
+    loadDashboard();
+
+    setInterval(
+      loadDashboard,
+      300000
+    );
+  </script>
+
+</body>
+</html>
