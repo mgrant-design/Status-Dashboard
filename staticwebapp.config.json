@@ -1,4 +1,7 @@
 {
+  "platform": {
+    "apiRuntime": "node:20"
+  },
   "routes": [
     {
       "route": "/*",
@@ -7,7 +10,7 @@
   ],
   "responseOverrides": {
     "401": {
-      "redirect": "/.auth/login/google",
+      "redirect": "/.auth/login/aad",
       "statusCode": 302
     }
   }
