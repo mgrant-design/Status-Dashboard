@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pure Dental Status Dashboard</title>
   <style>
     * {
       box-sizing: border-box;
@@ -1192,25 +1193,41 @@
       }
     }
 
-    function loadDashboard() {
-      google.script.run
-        .withSuccessHandler(function(services) {
-          renderDashboard(services || []);
-        })
-        .withFailureHandler(function(error) {
-          document.getElementById('bookmarkBar')
-            .innerHTML = '';
+    async function loadDashboard() {
+      try {
+        const response = await fetch('/api/status', {
+          method: 'GET',
+          cache: 'no-store'
+        });
 
-          document.getElementById('dashboard')
-            .innerHTML =
-            '<div class="error">' +
-            (
-              error.message ||
-              'Unable to load dashboard'
-            ) +
-            '</div>';
-        })
-        .getDashboardStatus();
+        if (!response.ok) {
+          throw new Error('API returned HTTP ' + response.status);
+        }
+
+        const payload = await response.json();
+
+        if (
+          !payload ||
+          payload.success !== true ||
+          !Array.isArray(payload.services)
+        ) {
+          throw new Error('Invalid status API response');
+        }
+
+        renderDashboard(payload.services);
+      } catch (error) {
+        document.getElementById('bookmarkBar')
+          .innerHTML = '';
+
+        document.getElementById('dashboard')
+          .innerHTML =
+          '<div class="error">' +
+          (
+            error.message ||
+            'Unable to load dashboard'
+          ) +
+          '</div>';
+      }
     }
 
     loadDashboard();
